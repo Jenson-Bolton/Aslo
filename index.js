@@ -20,12 +20,18 @@ let global_session;
 const sleep = (ms = 2000) => new Promise((r) => setTimeout(r, ms));
 
 async function welcome() {
+
 	const ranbowTitle = chalkAnimation.rainbow(
 		'Welcome to Aslo! \n'
 	);
 
 	await sleep();
 	ranbowTitle.stop();
+
+	console.log(`
+	Type ${chalk.bgBlue(' HELP ')} for commands
+
+    `)
 
 }
 
@@ -71,7 +77,7 @@ async function askLogin() {
 
 	userPassword = password.user_password;
 
-	handleLogin()
+	await handleLogin()
 }
 
 async function handleLogin() {
@@ -79,10 +85,12 @@ async function handleLogin() {
 		email: userEmail,
 		password: userPassword,
 	});
+
 	if (error === null) {
 		console.log("yo");
 		global_user = user;
 		global_session = session;
+		return;
 	}
 
 	console.log(chalk.red(error.message));
@@ -90,7 +98,8 @@ async function handleLogin() {
 }
 
 async function greet() {
-	let greeting = chalkAnimation.neon(`\n Good to see you ${global_user.user_metadata.first_name} ${global_user.user_metadata.last_name} \n`, 2);
+	let greeting = chalkAnimation.neon(`
+	Good to see you ${global_user.user_metadata.first_name} \n`, 2);
 
 	await sleep();
 	greeting.stop();
@@ -98,4 +107,7 @@ async function greet() {
 
 await welcome();
 await askLogin();
+
+console.log(global_user.id);
+
 await greet();

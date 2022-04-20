@@ -1,19 +1,20 @@
 {
   "name": "aslo",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "CLI bug tracker and note taker",
-  "homepage": "https://jensonbolton.com"
+  "homepage": "https://jensonbolton.com",
   "main": "index.js",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/Jenson-Bolton/Aslo"
   },
   "scripts": {
     "test": "jest --watchAll --verbose"
   },
+  "bin": "./index.js",
   "keywords": [],
-  "author": "",
+  "author": "Jenson Bolton",
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^1.34.1",
