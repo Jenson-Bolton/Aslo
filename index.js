@@ -105,9 +105,23 @@ async function greet() {
 	greeting.stop();
 }
 
+async function getNotes() {
+
+	return await supabase
+	.from('notes')
+	.select();
+
+}
+
+console.log(await getNotes());
+
+/*
+
 await welcome();
 await askLogin();
 
 console.log(global_user.id);
 
 await greet();
+
+*/
