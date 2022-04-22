@@ -9,9 +9,6 @@
     "type": "git",
     "url": "https://github.com/Jenson-Bolton/Aslo"
   },
-  "scripts": {
-    "test": "jest --watchAll --verbose"
-  },
   "bin": "./index.js",
   "keywords": [],
   "author": "Jenson Bolton",

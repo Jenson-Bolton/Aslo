@@ -20,19 +20,24 @@ let global_session;
 const sleep = (ms = 2000) => new Promise((r) => setTimeout(r, ms));
 
 async function welcome() {
+    console.clear();
+    const msg = 'Welcome to ASLO! \n';
+	let rainbowTitle;
 
-	const ranbowTitle = chalkAnimation.rainbow(
-		'Welcome to Aslo! \n'
-	);
+    figlet(msg, (err, data) => {
+		rainbowTitle = chalkAnimation.rainbow(
+			data
+		);
+        // console.log(gradient.pastel.multiline(data));
+    });
 
 	await sleep();
-	ranbowTitle.stop();
+	rainbowTitle.stop();
 
 	console.log(`
 	Type ${chalk.bgBlue(' HELP ')} for commands
 
     `)
-
 }
 
 async function askName() {
@@ -47,6 +52,8 @@ async function askName() {
 
 	userName = answer.player_name;
 }
+
+// LOGIN ----------------------------------
 
 async function askLogin() {
 	const email = await inquirer.prompt({
@@ -87,7 +94,6 @@ async function handleLogin() {
 	});
 
 	if (error === null) {
-		console.log("yo");
 		global_user = user;
 		global_session = session;
 		return;
@@ -105,6 +111,43 @@ async function greet() {
 	greeting.stop();
 }
 
+// ALL ------------------------------------
+
+async function askNew() {
+    const item_type = await inquirer.prompt({
+        name: 'new_item',
+        type: 'list',
+        message: 'What item do you want to create?',
+        choices: [
+            'Bug',
+			'Note',
+			'Project',
+            'Task'
+        ],
+    });
+
+	switch (item_type.new_item) {
+		case "Bug":
+			console.log(chalk.bgCyan('Bug'));
+			break;
+
+		case "Note":
+			console.log(chalk.bgCyan('Note'));
+			break;
+
+		case "Project":
+			console.log(chalk.bgCyan('Project'));
+			break;
+			
+		case "Task":
+			console.log(chalk.bgCyan('Task'));
+			break;
+	}
+
+}
+
+// NOTES ----------------------------------
+
 async function getNotes() {
 
 	return await supabase
@@ -113,15 +156,54 @@ async function getNotes() {
 
 }
 
-console.log(await getNotes());
+// MISC -----------------------------------
 
-/*
+async function help() {
+	console.log(`
+	HELP - Prints out all commands
+	NEW  - Creates a new item
+	EXIT - Quits the program
+	`)
+}
+
+
+
+// MAIN -----------------------------------
 
 await welcome();
-await askLogin();
 
-console.log(global_user.id);
+while (true) {
 
-await greet();
+	const command = await inquirer.prompt({
+		name: 'user_command',
+		type: 'input',
+		message: 'What do you want to do?',
+	});
 
-*/
+	let action = command.user_command;
+
+	if (action.toLowerCase() === "exit") { break; }
+
+	switch (action.toLowerCase()) {
+
+		case "help":
+			await help();
+			break;
+
+		case "login":
+			await askLogin();
+			await greet();
+			break;
+
+		case "signup":
+			break;
+
+		case "new":
+			await askNew();
+			break;
+
+		default:
+			console.log("\n");
+	}
+
+}
