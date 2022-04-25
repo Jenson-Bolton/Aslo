@@ -11,9 +11,6 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient('https://cinvrhnlxmkszbrirgxg.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzNjIxNzMzMCwiZXhwIjoxOTUxNzkzMzMwfQ.AUCfgsxVNn7LyUIoqqxYsF4Rqs-CeQEkLNBwKBzkpBo')
 
-let userName;
-let userEmail;
-let userPassword;
 let global_user;
 let global_session;
 
@@ -48,7 +45,7 @@ async function askName() {
 		default() {
 			return 'John Doe'
 		}
-	});
+	}); 
 
 	userName = answer.player_name;
 }
@@ -68,8 +65,6 @@ async function askLogin() {
 		}
 	});
 
-	userEmail = email.user_email;
-
 	const password = await inquirer.prompt({
 		name: 'user_password',
 		type: 'password',
@@ -82,12 +77,10 @@ async function askLogin() {
 		}
 	});
 
-	userPassword = password.user_password;
-
-	await handleLogin()
+	await handleLogin(email.user_email, password.user_password)
 }
 
-async function handleLogin() {
+async function handleLogin(userEmail, userPassword) {
 	const { user, session, error } = await supabase.auth.signIn({
 		email: userEmail,
 		password: userPassword,
@@ -109,6 +102,98 @@ async function greet() {
 
 	await sleep();
 	greeting.stop();
+}
+
+// SIGNUP ---------------------------------
+
+async function askSignUp() {
+	const email = await inquirer.prompt({
+		name: 'user_email',
+		type: 'input',
+		message: 'What is your email?',
+		validate(e) {
+			if ( !/@/.test(e) ) {
+				return 'Please enter a valid email address'
+			}
+			return true;
+		}
+	});
+
+	const password = await inquirer.prompt({
+		name: 'user_password',
+		type: 'password',
+		message: 'What is your password?',
+		validate(e) {
+			if ( e.length < 6 ) {
+				return 'Please enter a valid password'
+			}
+			return true;
+		}
+	});
+
+	const confirm_password = await inquirer.prompt({
+		name: 'user_password',
+		type: 'password',
+		message: 'What is your password?',
+		validate(e) {
+			if ( e.length < 6 ) {
+				return 'Please enter a valid password'
+			}
+			return true;
+		}
+	});
+
+	if (confirm_password.user_password !== password.user_password) {
+		await askSignUp();
+	}
+
+	const first_name = await inquirer.prompt({
+		name: 'user_first',
+		type: 'input',
+		message: 'What is your first name?',
+		validate(e) {
+			if ( e.length < 1 ) {
+				return 'No name given'
+			}
+			return true;
+		}
+	});
+
+	const last_name = await inquirer.prompt({
+		name: 'user_last',
+		type: 'input',
+		message: 'What is your last name?',
+		validate(e) {
+			if ( e.length < 1 ) {
+				return 'No name given'
+			}
+			return true;
+		}
+	});
+
+	await handleSignUp(email.user_email, password.user_password, first_name.user_first, last_name.user_last)
+}
+
+async function handleSignUp(userEmail, userPassword, firstName, lastName) {
+	const { user, session, error } = await supabase.auth.signUp({
+		email: userEmail,
+		password: userPassword,
+	},
+	{
+	  data: { 
+		first_name: firstName, 
+		last_name: lastName,
+	  }
+	});
+
+	if (error === null) {
+		global_user = user;
+		global_session = session;
+		return;
+	}
+
+	console.log(chalk.red(error.message));
+	await askSignUp();
 }
 
 // ALL ------------------------------------
@@ -160,9 +245,11 @@ async function getNotes() {
 
 async function help() {
 	console.log(`
-	HELP - Prints out all commands
-	NEW  - Creates a new item
-	EXIT - Quits the program
+	HELP   - Prints out all commands
+	NEW    - Creates a new item
+	LOGIN  - Login to your ASLO account
+	SIGNUP - Create an ASLO account
+	EXIT   - Quits the program
 	`)
 }
 
@@ -196,6 +283,7 @@ while (true) {
 			break;
 
 		case "signup":
+			await askSignUp();
 			break;
 
 		case "new":
