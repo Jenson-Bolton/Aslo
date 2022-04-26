@@ -13,6 +13,7 @@ const supabase = createClient('https://cinvrhnlxmkszbrirgxg.supabase.co', 'eyJhb
 
 let global_user;
 let global_session;
+let logged_in = false;
 
 const sleep = (ms = 2000) => new Promise((r) => setTimeout(r, ms));
 
@@ -233,11 +234,68 @@ async function askNew() {
 
 // NOTES ----------------------------------
 
+async function getItems() {
+
+	const item_type = await inquirer.prompt({
+        name: 'new_item',
+        type: 'list',
+        message: 'What item do you want to fetch?',
+        choices: [
+            'Bug',
+			'Note',
+			'Project',
+            'Task'
+        ],
+    });
+
+	switch (item_type.new_item) {
+		case "Bug":
+			console.log(chalk.bgCyan('Bug'));
+			break;
+
+		case "Note":
+			let data = await getNotes();
+
+			data.push('<- Back <-');
+
+			const display = await inquirer.prompt({
+				name: 'data',
+				type: 'list',
+				message: 'Notes:',
+				choices: data,
+			});
+			break;
+
+		case "Project":
+			console.log(chalk.bgCyan('Project'));
+			break;
+			
+		case "Task":
+			console.log(chalk.bgCyan('Task'));
+			break;
+	}
+
+}
+
 async function getNotes() {
 
-	return await supabase
+	let res = await supabase
 	.from('notes')
 	.select();
+
+	if (res.body.length == 0) {
+		return [`
+	You have no notes
+`];
+	}
+
+	let data = [];
+
+	res.body.forEach(element => {
+		data.push(element.note);
+	});
+
+	return data;
 
 }
 
@@ -273,6 +331,16 @@ while (true) {
 
 	switch (action.toLowerCase()) {
 
+		case "hi":
+			
+			let hello = chalkAnimation.neon(`
+	Hey There! \n`, 2);
+		
+			await sleep();
+			hello.stop();
+
+			break;
+
 		case "help":
 			await help();
 			break;
@@ -288,6 +356,10 @@ while (true) {
 
 		case "new":
 			await askNew();
+			break;
+
+		case "get":
+			await getItems();
 			break;
 
 		default:
